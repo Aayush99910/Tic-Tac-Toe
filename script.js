@@ -1,5 +1,5 @@
-// Module of gameboard which makes player and returns an empty array
-// player1 and player 2
+// Module of gameboard which makes a factory function
+// for Player and returns an empty array
 const GameBoard = (() => {
     let gameboard = []; //empty gameboard which will be populated by player mark
 
@@ -11,32 +11,25 @@ const GameBoard = (() => {
             turn
         };
     };
-
-    // making two players manually
-    const player1 = Player("Sinju", "X", true);
-    const player2 = Player("Aayush", "O", false);
     
-
     // returning necessary variable/methods
     return {
         gameboard: gameboard,
-        player1: player1,
-        player2: player2
+        Player: Player
     };
 })();
+
 
 
 // CheckWinner module which gives access to winner function 
 // it checks whether game is won or not
 const CheckWinner = (function() {
 
-    const header = document.querySelector("#player-turn");
-
     // shows winner in the document. This is a private function 
     // and only Winner has access to it
     const _showWinner = function (won) {
         if (won) {
-            header.textContent = "The game is finished!"
+            DisplayController.showWinner();
         } 
     }
 
@@ -90,19 +83,30 @@ const CheckWinner = (function() {
 })();
 
 
+// This module displays everything that is needed on page by
+// interacting with the DOM elements
+const DisplayController = (function () {
 
-// actual GameFlow which runs the game
-const GameFlow = (function () {
-    // getting the gameboard, player1 and player 2 from GameBoard
+    // getting the gameboard, factory function player from GameBoard
     const gameboard = GameBoard.gameboard;
-    const player1 = GameBoard.player1;
-    const player2 = GameBoard.player2;
+    const Player = GameBoard.Player;
 
-    //DOM elements
-    const boxs = document.querySelectorAll(".box");
+
+    // making two players manually
+    const player1 = Player("Sinju", "X", true);
+    const player2 = Player("Aayush", "O", false);
+
+    // DOM elements
+    const header = document.querySelector("header");
     const showplayerTurn = document.querySelector("#player-turn");
+    const gameContainer = document.querySelector(".game-container");
 
-
+    // function that shows grid
+    const showGrid = function () {
+        header.style.display = "none";
+        gameContainer.style.display = "contents";
+    }
+    
     // renders mark when the player clicks on the board
     const renderMark = function (e) {
         if (e.target.innerText !== ""){
@@ -131,6 +135,7 @@ const GameFlow = (function () {
             }
 
         }
+
         // if its player2's turn, if there is no winner and if the board
         // is empty this if statement works.
         else if (e.target.innerText === "" 
@@ -155,7 +160,37 @@ const GameFlow = (function () {
         }
     }
 
-    // event listener for each box whixh fired the renderMark function
-    boxs.forEach((box) => {box.addEventListener("click", renderMark)});
+    const showWinner = function () {
+        const header = document.querySelector("#player-turn");
+        header.textContent = "The game is finished!"
+    }
+
+    // returning showgrid function and renderMark function 
+    return {
+        render: renderMark,
+        renderGrid: showGrid,
+        showWinner: showWinner
+    }
 })();
+
+
+
+// actual GameFlow which runs the game
+const GameFlow = (function () {
+
+    //DOM elements
+    const startBtn = document.querySelector("#start-btn");
+    const boxs = document.querySelectorAll(".box");
+
+    // event listener for each box which fires the renderMark function
+    // from DisplayController Module
+    boxs.forEach((box) => {box.addEventListener("click", DisplayController.render)});
+
+
+    // event listener for start Btn
+    startBtn.addEventListener("click", DisplayController.renderGrid);
+})();
+
+
+
 
