@@ -99,12 +99,14 @@ const DisplayController = (function () {
     // DOM elements
     const header = document.querySelector("header");
     const showplayerTurn = document.querySelector("#player-turn");
-    const gameContainer = document.querySelector(".game-container");
+    const gameContainer = document.querySelector("main");
+    const footer = document.querySelector("footer");
 
     // function that shows grid
     const showGrid = function () {
         header.style.display = "none";
-        gameContainer.style.display = "contents";
+        gameContainer.style.display = "flex";
+        footer.style.display = "contents";
     }
     
     // renders mark when the player clicks on the board
