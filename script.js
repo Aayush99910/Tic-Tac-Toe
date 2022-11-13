@@ -37,40 +37,109 @@ const CheckWinner = (function() {
     // it only works if the marks are 3 in a row else
     // it doesn't show the winner
     const Winner = function(mark) {
-        console.log(`"${mark}"`);
         const gameboard = GameBoard.gameboard;
         let winPattern = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7 ,8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [2, 4, 6],
-            [0, 4, 8]
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7 ,8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [2, 4, 6],
+        [0, 4, 8]
         ]
 
-        
-        let test = [];
+    
+        let Test = [];
         for (let i = 0; i < gameboard.length; i++) {
-            if (gameboard[i] === mark && test.length < 3) {
-                test.push(i);
+            if (gameboard[i] === mark) {
+                Test.push(i);
             }
         }
 
         let stillWinner;
-        for (let i = 0; i < winPattern.length; i++) {
-            for (let j = 0; j < winPattern[i].length; j++) {
-                if (winPattern[i][j] === test[j]) {
-                    stillWinner = true;
-                }else { 
-                    stillWinner = false;
-                    break;
+        if (Test.includes(2) && Test.includes(5) && Test.includes(8)) {
+            _showWinner(true);
+        } else if (Test.includes(1) && Test.includes(4) && Test.includes(7)) {
+            _showWinner(true);
+        }
+        for (let i = 0; i <= Test.length; i++) {
+            let test = [];
+            let lastIndexOfTest = Test.length - 1;
+
+            if (i === Test.length) {
+                let Tst = Test.filter((item) => {
+                    if (item === 0) {
+                        return true;
+                    } else if (item !== 0 && item % 2 === 0){
+                        return true;
+                    } else if (item !== 0 && item % 2 !== 0) {
+                        return false;
+                    }
+                });
+
+                for (let l = 0; l < Tst.length; l++) {
+                    let tst = [];
+                    let lastIndexOfTst = Tst.length - 1;
+                    tst[0] = Tst[l];
+
+                    if ((l + 1) > lastIndexOfTst) {
+                        tst[1] = Tst[0];
+                        tst[2] = Tst[1];
+                    } else if ((l + 2) > lastIndexOfTst) {
+                        tst[1]  = Tst[l + 1];
+                        tst[2]  = Tst[0];
+                    } 
+                    else {
+                        tst[1]  = Tst[l + 1];
+                        tst[2] = Tst[l + 2];
+                    }
+                    tst.sort();
+
+                    for (let j = 0; j < winPattern.length; j++) {
+                        for (let k = 0; k < winPattern[j].length; k++) {
+                            if (winPattern[j][k] === tst[k]) {
+                                stillWinner = true;
+                            }else { 
+                                stillWinner = false;
+                                break;
+                            }
+                        }
+                        if (stillWinner) {
+                            _showWinner(stillWinner);
+                        }
+                    }
+                }
+            }else {
+                test[0] = Test[i];
+
+                if ((i + 1) > lastIndexOfTest) {
+                    test[1] = Test[0];
+                    test[2] = Test[1];
+                } else if ((i + 2) > lastIndexOfTest) {
+                    test[1]  = Test[i + 1];
+                    test[2]  = Test[0];
+                } 
+                else {
+                    test[1]  = Test[i + 1];
+                    test[2] = Test[i + 2];
                 }
             }
-            if (stillWinner) {
-                _showWinner(stillWinner); // closure
-                break;
+
+            test.sort();
+
+            for (let j = 0; j < winPattern.length; j++) {
+                for (let k = 0; k < winPattern[j].length; k++) {
+                    if (winPattern[j][k] === test[k]) {
+                        stillWinner = true;
+                    }else { 
+                        stillWinner = false;
+                        break;
+                    }
+                }
+                if (stillWinner) {
+                    _showWinner(stillWinner);
+                }
             }
         }
         _showWinner(stillWinner); // closure 
@@ -93,8 +162,8 @@ const DisplayController = (function () {
 
 
     // making two players manually
-    const player1 = Player("Sinju", "X", true);
-    const player2 = Player("Aayush", "O", false);
+    const player1 = Player("Player 1", "X", true);
+    const player2 = Player("Player 2", "O", false);
 
     // DOM elements
     const header = document.querySelector("header");
@@ -102,11 +171,18 @@ const DisplayController = (function () {
     const gameContainer = document.querySelector("main");
     const footer = document.querySelector("footer");
 
-    // function that shows grid
+    // function that hides the main and shows the grid
     const showGrid = function () {
         header.style.display = "none";
         gameContainer.style.display = "flex";
-        footer.style.display = "contents";
+        footer.style.display = "flex";
+    }
+
+    // function that shows the main and hides the main
+    const hideGrid = function () {
+        header.style.display = "block";
+        gameContainer.style.display = "none";
+        footer.style.display = "none";
     }
     
     // renders mark when the player clicks on the board
@@ -121,6 +197,7 @@ const DisplayController = (function () {
             && player1.turn === true
             && showplayerTurn.textContent !== "The game is finished!") {
 
+            e.target.style.color = "red";
             e.target.textContent = player1.mark; // putting the player's mark in the box
             gameboard[Number(e.target.id)] = player1.mark; // adding the mark in the gameboard array
             
@@ -144,6 +221,7 @@ const DisplayController = (function () {
                 && player2.turn === true
                 && showplayerTurn.textContent !== "The game is finished!") { 
             
+                    e.target.style.color = "black";
                     e.target.textContent = player2.mark; // putting the player's mark in the box
                     gameboard[Number(e.target.id)] = player2.mark; // adding the mark in the gameboard array
             
@@ -167,11 +245,21 @@ const DisplayController = (function () {
         header.textContent = "The game is finished!"
     }
 
+    // const restartGame = function () {
+    //     gameboard = [];
+    //     const boxs = document.querySelectorAll(".box");
+    //     boxs.forEach((box) => {
+    //         box.innerText = "";
+    //     });
+    // }
+
     // returning showgrid function and renderMark function 
     return {
         render: renderMark,
         renderGrid: showGrid,
-        showWinner: showWinner
+        hideGrid: hideGrid,
+        showWinner: showWinner,
+        restart: restartGame
     }
 })();
 
@@ -183,6 +271,8 @@ const GameFlow = (function () {
     //DOM elements
     const startBtn = document.querySelector("#start-btn");
     const boxs = document.querySelectorAll(".box");
+    const gobackBtn = document.querySelector("#goback-btn");
+    const restartBtn = document.querySelector("#restart-btn");
 
     // event listener for each box which fires the renderMark function
     // from DisplayController Module
@@ -191,6 +281,12 @@ const GameFlow = (function () {
 
     // event listener for start Btn
     startBtn.addEventListener("click", DisplayController.renderGrid);
+
+    // event listener for goback Btn
+    gobackBtn.addEventListener("click", DisplayController.hideGrid);
+
+    // event listener for restart Btn
+    // restartBtn.addEventListener("click", DisplayController.restart);
 })();
 
 
