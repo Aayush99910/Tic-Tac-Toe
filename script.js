@@ -15,7 +15,7 @@ const GameBoard = (() => {
     // returning necessary variable/methods
     return {
         gameboard: gameboard,
-        Player: Player
+        Player: Player,
     };
 })();
 
@@ -25,11 +25,20 @@ const GameBoard = (() => {
 // it checks whether game is won or not
 const CheckWinner = (function() {
 
+    let winner = false; 
+    
+    const _draw = function (string) {
+        if (string.toLowerCase() === "draw") {
+            DisplayController.draw();
+        }
+    }
+
     // shows winner in the document. This is a private function 
     // and only Winner has access to it
     const _showWinner = function (won, playername) {
         if (won) {
             DisplayController.showWinner(playername);
+            winner = true;
         } 
     }
 
@@ -47,6 +56,8 @@ const CheckWinner = (function() {
             [2, 4, 6],
             [0, 4, 8]
         ]
+
+        winner = false;
 
     
         let Test = []; // array which stores all the given mark
@@ -71,6 +82,11 @@ const CheckWinner = (function() {
 
         // looping through Test array
         for (let i = 0; i <= Test.length; i++) {
+
+            if (winner) {
+                return
+            }
+
             let test = []; 
             let lastIndexOfTest = Test.length - 1;
 
@@ -164,12 +180,15 @@ const CheckWinner = (function() {
                     }
                 }
                 if (stillWinner) {
-                    _showWinner(stillWinner, playername);
+                    _showWinner(stillWinner, playername); // closure 
                     break;
                 }
             }
+        } 
+        if (stillWinner === false && Test.length === 5) {
+            _draw("Draw");
         }
-        _showWinner(stillWinner, playername); // closure 
+        _showWinner(stillWinner, playername); 
     }
 
     // returning Winner method
@@ -183,33 +202,68 @@ const CheckWinner = (function() {
 // interacting with the DOM elements
 const DisplayController = (function () {
 
-    // getting the gameboard, factory function player from GameBoard
-    let gameboard = GameBoard.gameboard;
-    const Player = GameBoard.Player;
-
-
-    // making two players manually
-    const player1 = Player("Player 1", "X", true);
-    const player2 = Player("Player 2", "O", false);
-
     // DOM elements
     const header = document.querySelector("header");
     const playerTurnText = document.querySelector("#player-turn");
     const showplayerTurn = document.querySelector("#player-turn");
-    const gameContainer = document.querySelector("main");
+    const main = document.querySelector("main");
     const footer = document.querySelector("footer");
+    const formContainer = document.querySelector(".form-container");
+    const gameContainer = document.querySelector(".game-container");
+    const form = document.querySelector("form");
+
+
+    // getting the gameboard, factory function player from GameBoard
+    let gameboard = GameBoard.gameboard;
+    const Player = GameBoard.Player;
+    let player1;
+    let player2;
+    let winner = false;
+    let Draw = false;
+
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        let player1name= document.querySelector("#player1name").value;
+        let player2name = document.querySelector("#player2name").value;
+
+        // making two players and naming them by getting
+        // input from the DOM
+        player1 = Player(player1name, "X", true);
+        player2 = Player(player2name, "O", false);
+    })
+
+    // function that shows the grid
+    const showForm = function () {
+        header.style.display = "none";
+        formContainer.style.display = "flex";
+        main.style.display = "flex";
+        main.style.alignItems = "center";
+    }
 
     // function that hides the main and shows the grid
     const showGrid = function () {
+        const player1name= document.querySelector("#player1name").value;
+        const player2name = document.querySelector("#player2name").value;
+
+        if (player1name === "" || player2name === "") {
+            alert("Please provide player name.")
+            return;
+        }
+
+        showplayerTurn.textContent = `${player1name} turn!`
         header.style.display = "none";
         gameContainer.style.display = "flex";
+        formContainer.style.display = "none";
         footer.style.display = "flex";
     }
 
     // function that shows the main and hides the main
     const hideGrid = function () {
         header.style.display = "block";
+        main.style.display = "none";
         gameContainer.style.display = "none";
+        formContainer.style.display = "none";
         footer.style.display = "none";
     }
     
@@ -221,10 +275,8 @@ const DisplayController = (function () {
 
 
         // if there is a winner already declared then it just skips
-        if (showplayerTurn.textContent === "Player 1 Won!") {
+        if (winner || Draw) {
             return 
-        }else if (showplayerTurn.textContent === "Player 2 Won!") {
-            return
         }
         
         // if its player1's turn, if there is no winner and if the board
@@ -246,9 +298,7 @@ const DisplayController = (function () {
 
             // if winner already declared then nothing happens 
             // if not then displays other player's turn 
-            if (showplayerTurn.textContent === "Player 1 Won!") {
-                // pass
-            }else if (showplayerTurn.textContent === "Player 2 Won!") {
+            if (winner || Draw) {
                 // pass
             }else{
                 showplayerTurn.textContent = `${player2.name} turn!`;
@@ -258,7 +308,8 @@ const DisplayController = (function () {
 
         // if its player2's turn, if there is no winner and if the board
         // is empty this if statement works.
-        else if (e.target.innerText === "" && player2.turn === true) { 
+        else if (e.target.innerText === "" && player2.turn === true) {
+
             e.target.style.color = "black";
             e.target.textContent = player2.mark; // putting the player's mark in the box
             gameboard[Number(e.target.id)] = player2.mark; // adding the mark in the gameboard array
@@ -271,9 +322,7 @@ const DisplayController = (function () {
             player1.turn = true; // player1 turn now 
 
 
-            if (showplayerTurn.textContent === "Player 1 Won!") {
-                // pass
-            }else if (showplayerTurn.textContent === "Player 2 Won!") {
+            if (winner || Draw){
                 // pass
             }else{
                 showplayerTurn.textContent = `${player1.name} turn!`;
@@ -282,21 +331,38 @@ const DisplayController = (function () {
     }
 
     const showWinner = function (playername) {
+        winner = true;
+
         // shows the winner
         playerTurnText.textContent = `${playername} Won!`
     }
 
+    const draw = function () {
+        Draw = true;
+        // shows if draw
+        playerTurnText.textContent = "Draw";
+    }
+
     const restartGame = function () {
         gameboard = [];
+        winner = false;
+        Draw = false;
         const boxs = document.querySelectorAll(".box");
         boxs.forEach((box) => {
             box.innerText = "";
         });
+
+
+        if (playerTurnText.textContent === "Draw" && player1.turn) {
+            playerTurnText.textContent = `${player1.name} turn!`;
+        }else if (playerTurnText.textContent === "Draw" && player2.turn) {
+            playerTurnText.textContent = `${player2.name} turn!`;
+        }
         
-        if (playerTurnText.textContent === "Player 1 Won!") {
-            playerTurnText.textContent = "Player 2 turn!";
-        }else if (playerTurnText.textContent === "Player 2 Won!") {
-            playerTurnText.textContent = "Player 1 turn!";
+        if (playerTurnText.textContent === `${player1.name} Won!`) {
+            playerTurnText.textContent = `${player2.name} turn!`;
+        }else if (playerTurnText.textContent === `${player2.name} Won!`) {
+            playerTurnText.textContent = `${player1.name} turn!`;
         }
     }
 
@@ -306,7 +372,9 @@ const DisplayController = (function () {
         renderGrid: showGrid,
         hideGrid: hideGrid,
         showWinner: showWinner,
-        restart: restartGame
+        restart: restartGame,
+        renderForm: showForm,
+        draw: draw
     }
 })();
 
@@ -318,8 +386,10 @@ const GameFlow = (function () {
     //DOM elements
     const startBtn = document.querySelector("#start-btn");
     const boxs = document.querySelectorAll(".box");
+    const playBtn = document.querySelector("#play-btn");
     const gobackBtn = document.querySelector("#goback-btn");
     const restartBtn = document.querySelector("#restart-btn");
+
 
     // event listener for each box which fires the renderMark function
     // from DisplayController Module
@@ -327,7 +397,10 @@ const GameFlow = (function () {
 
 
     // event listener for start Btn
-    startBtn.addEventListener("click", DisplayController.renderGrid);
+    startBtn.addEventListener("click", DisplayController.renderForm);
+
+    // event listener for play Btn
+    playBtn.addEventListener("click", DisplayController.renderGrid);
 
     // event listener for goback Btn
     gobackBtn.addEventListener("click", DisplayController.hideGrid);
