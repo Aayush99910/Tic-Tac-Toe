@@ -23,8 +23,23 @@
     </header>
 
     <main>
+        <section class="form-container">
+            <form>
+                <div class="input-container">
+                    <label for="player1name" id="player1">Player 1 name:</label>
+                    <input autocomplete="off" type="text" id="player1name" required placeholder="Player 1's name" value="Player 1">
+                </div>
+                <div class="input-container">
+                    <label for="player2name">Player 2 name:</label>
+                    <input autocomplete="off" type="text" id="player2name" required placeholder="Player 2's name" value="Player 2">
+                </div>
+                <div class="container">
+                    <button id="play-btn" type="submit">Play</button>
+                </div>
+            </form>
+        </section>
         <section class="game-container">
-            <h1 id="player-turn">Player 1 turn!</h1>
+            <h1 id="player-turn"></h1>
     
             <div class="grid-container">
                 <div class="box" id="0" style="border-top: none; border-left: none;"></div>
