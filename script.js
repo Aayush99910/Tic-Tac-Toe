@@ -25,8 +25,10 @@ const GameBoard = (() => {
 // it checks whether game is won or not
 const CheckWinner = (function() {
 
-    let winner = false; 
+    let winner = false; // no winner at the first
     
+    // this function renders draw if there is no winner and also if all 
+    // the array fills up
     const _draw = function (string) {
         if (string.toLowerCase() === "draw") {
             DisplayController.draw();
@@ -38,7 +40,7 @@ const CheckWinner = (function() {
     const _showWinner = function (won, playername) {
         if (won) {
             DisplayController.showWinner(playername);
-            winner = true;
+            winner = true; // winner is assigned to true if winner is declared
         } 
     }
 
@@ -57,7 +59,7 @@ const CheckWinner = (function() {
             [0, 4, 8]
         ]
 
-        winner = false;
+        winner = false; // winner is false everytime we check for the winner
 
     
         let Test = []; // array which stores all the given mark
@@ -83,11 +85,12 @@ const CheckWinner = (function() {
         // looping through Test array
         for (let i = 0; i <= Test.length; i++) {
 
+            // if winner is already declared then we skip
             if (winner) {
-                return
+                return;
             }
 
-            let test = []; 
+            let test = []; // test case 
             let lastIndexOfTest = Test.length - 1;
 
             // this will only fire when i is equal to the Test's length
@@ -221,9 +224,9 @@ const DisplayController = (function () {
     let winner = false;
     let Draw = false;
 
-
+    // getting all the input from the form
     form.addEventListener("submit", (e) => {
-        e.preventDefault();
+        e.preventDefault(); // preventing default 
         let player1name= document.querySelector("#player1name").value;
         let player2name = document.querySelector("#player2name").value;
 
@@ -246,9 +249,11 @@ const DisplayController = (function () {
         const player1name= document.querySelector("#player1name").value;
         const player2name = document.querySelector("#player2name").value;
 
+
+        // if no input then we alert the user.
         if (player1name === "" || player2name === "") {
             alert("Please provide player name.")
-            return;
+            return; // skips if there is no input
         }
 
         showplayerTurn.textContent = `${player1name} turn!`
@@ -260,6 +265,15 @@ const DisplayController = (function () {
 
     // function that shows the main and hides the main
     const hideGrid = function () {
+        // when we goback to the main title everything is reset
+        gameboard = [];
+        winner = false;
+        Draw = false;
+        const boxs = document.querySelectorAll(".box");
+        boxs.forEach((box) => {
+            box.innerText = "";
+        });
+
         header.style.display = "block";
         main.style.display = "none";
         gameContainer.style.display = "none";
@@ -275,6 +289,7 @@ const DisplayController = (function () {
 
 
         // if there is a winner already declared then it just skips
+        // or if there is a draw it skips
         if (winner || Draw) {
             return 
         }
@@ -352,13 +367,16 @@ const DisplayController = (function () {
             box.innerText = "";
         });
 
-
+        // if draw and player1's turn then we show player1 turn in the DOM
         if (playerTurnText.textContent === "Draw" && player1.turn) {
             playerTurnText.textContent = `${player1.name} turn!`;
-        }else if (playerTurnText.textContent === "Draw" && player2.turn) {
+        }
+        // if draw and player2's turn then we show player2 turn in the DOM
+        else if (playerTurnText.textContent === "Draw" && player2.turn) {
             playerTurnText.textContent = `${player2.name} turn!`;
         }
         
+        // if player 1 won then player 2's turn is showed and vice versa
         if (playerTurnText.textContent === `${player1.name} Won!`) {
             playerTurnText.textContent = `${player2.name} turn!`;
         }else if (playerTurnText.textContent === `${player2.name} Won!`) {
@@ -366,7 +384,7 @@ const DisplayController = (function () {
         }
     }
 
-    // returning showgrid function and renderMark function 
+    // returning all the necessary function 
     return {
         render: renderMark,
         renderGrid: showGrid,
