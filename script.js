@@ -74,8 +74,12 @@ const CheckWinner = (function() {
         // winner which will be declared if the given person is winner
         let stillWinner;
 
-        // checking for winner if the pattern is [2, 5, 8]
-        if (Test.includes(2) && Test.includes(5) && Test.includes(8)) {
+
+        // checking for winner if the pattern is [0, 3, 6]
+        if (Test.includes(0) && Test.includes(3) && Test.includes(6)) {
+            return stillWinner = true;
+        } // checking for winner if the pattern is [2, 5, 8]
+        else if (Test.includes(2) && Test.includes(5) && Test.includes(8)) {
             _showWinner(true, playername);
         } // checking for winner if the pattern is [1, 4, 7]
         else if (Test.includes(1) && Test.includes(4) && Test.includes(7)) {
