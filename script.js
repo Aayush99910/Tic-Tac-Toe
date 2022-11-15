@@ -361,6 +361,12 @@ const DisplayController = (function () {
         playerTurnText.textContent = `${playername} Won!`
     }
 
+    const hideModal = function(event) {
+		if (event.target == modal) {
+			modal.style.display = "none";
+		}
+    }
+
     const draw = function () {
         Draw = true;
         // shows if draw
@@ -405,7 +411,8 @@ const DisplayController = (function () {
         showWinner: showWinner,
         restart: restartGame,
         renderForm: showForm,
-        draw: draw
+        draw: draw,
+        hideModal: hideModal
     }
 })();
 
@@ -426,7 +433,6 @@ const GameFlow = (function () {
     // from DisplayController Module
     boxs.forEach((box) => {box.addEventListener("click", DisplayController.render)});
 
-
     // event listener for start Btn
     startBtn.addEventListener("click", DisplayController.renderForm);
 
@@ -442,6 +448,8 @@ const GameFlow = (function () {
     // event listener for next round Btn
     nextRoundBtn.addEventListener("click", DisplayController.restart);
 
+    // hides modal if user clicks outside the box
+    window.onclick = DisplayController.hideModal;
 })();
 
 
