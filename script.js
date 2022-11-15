@@ -214,6 +214,7 @@ const DisplayController = (function () {
     const formContainer = document.querySelector(".form-container");
     const gameContainer = document.querySelector(".game-container");
     const form = document.querySelector("form");
+    const modal = document.querySelector("#id01");
 
 
     // getting the gameboard, factory function player from GameBoard
@@ -347,6 +348,10 @@ const DisplayController = (function () {
 
     const showWinner = function (playername) {
         winner = true;
+        modal.style.display = "flex";
+
+        const winnerPara = document.querySelector("#winner");
+        winnerPara.textContent = `${playername} Won!`;
 
         // shows the winner
         playerTurnText.textContent = `${playername} Won!`
@@ -358,7 +363,11 @@ const DisplayController = (function () {
         playerTurnText.textContent = "Draw";
     }
 
-    const restartGame = function () {
+    const restartGame = function () { 
+        if (window.getComputedStyle(modal).display === "flex") {
+            modal.style.display = "none";
+        }
+
         gameboard = [];
         winner = false;
         Draw = false;
@@ -407,7 +416,7 @@ const GameFlow = (function () {
     const playBtn = document.querySelector("#play-btn");
     const gobackBtn = document.querySelector("#goback-btn");
     const restartBtn = document.querySelector("#restart-btn");
-
+    const nextRoundBtn = document.querySelector("#next-round-btn");
 
     // event listener for each box which fires the renderMark function
     // from DisplayController Module
@@ -425,6 +434,10 @@ const GameFlow = (function () {
 
     // event listener for restart Btn
     restartBtn.addEventListener("click", DisplayController.restart);
+
+    // event listener for next round Btn
+    nextRoundBtn.addEventListener("click", DisplayController.restart);
+
 })();
 
 
