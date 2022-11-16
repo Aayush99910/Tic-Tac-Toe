@@ -1,13 +1,14 @@
 // Module of gameboard which makes a factory function
 // for Player and returns an empty array
 const GameBoard = (() => {
-    let gameboard = []; //empty gameboard which will be populated by player mark
+    let gameboard = ["", "", "", "", "", "", "", "", ""]; //empty gameboard which will be populated by player mark
     
     // factory function 
-    const Player = (name, mark, turn) => {
+    const Player = (name, mark, ai, turn) => {
         return {
             name, 
             mark,
+            ai,
             turn
         };
     };
@@ -17,6 +18,39 @@ const GameBoard = (() => {
         gameboard: gameboard,
         Player: Player,
     };
+})();
+
+
+//
+const Computer = (function () {
+    let randomNumber;
+
+    function _checkIfAvailable(gameboard) {
+        if (gameboard[randomNumber] === "") {
+            return randomNumber;
+        }else {
+            randomNumber = _generateRandomNumber();
+            let emptyPlace = (_checkIfAvailable(gameboard));
+            return emptyPlace;
+        }
+    }
+
+    const _generateRandomNumber = function () {
+        let randomNumber = Math.floor( Math.random() * 9);
+        return randomNumber;
+    }
+
+    const computerMove = function (gameboard) {
+        randomNumber = _generateRandomNumber();
+        let number = _checkIfAvailable(gameboard)
+        if(number) {
+            return number; 
+        };
+    }
+
+    return {
+        computerMove: computerMove
+    }
 })();
 
 
@@ -210,6 +244,7 @@ const CheckWinner = (function() {
 const DisplayController = (function () {
 
     // DOM elements
+    const boxs = document.querySelectorAll(".box");
     const header = document.querySelector("header");
     const playerTurnText = document.querySelector("#player-turn");
     const showplayerTurn = document.querySelector("#player-turn");
@@ -235,10 +270,22 @@ const DisplayController = (function () {
         let player1name= document.querySelector("#player1name").value;
         let player2name = document.querySelector("#player2name").value;
 
-        // making two players and naming them by getting
-        // input from the DOM
-        player1 = Player(player1name, "X", true);
-        player2 = Player(player2name, "O", false);
+        let computer = document.querySelector("#computer");
+        if (computer.checked) {
+
+            // making two players and if computer is checked
+            // then other player is computer
+            player1 = Player(player1name, "X", false, true);
+            player2 = Player("Computer", "O", true, false);
+        } else {
+
+            // making two players and naming them by getting
+            // input from the DOM
+            player1 = Player(player1name, "X", false, true);
+            player2 = Player(player2name, "O", false, false);
+        }
+        
+
     })
 
     // function that shows the grid
@@ -323,12 +370,12 @@ const DisplayController = (function () {
             }else{
                 showplayerTurn.textContent = `${player2.name} turn!`;
             }
-
+            console.log(gameboard);
         }
 
         // if its player2's turn, if there is no winner and if the board
         // is empty this if statement works.
-        else if (e.target.innerText === "" && player2.turn === true) {
+        else if (e.target.innerText === "" && player2.turn === true && player2.ai === false) {
 
             e.target.style.color = "black";
             e.target.textContent = player2.mark; // putting the player's mark in the box
@@ -347,6 +394,37 @@ const DisplayController = (function () {
             }else{
                 showplayerTurn.textContent = `${player1.name} turn!`;
             }
+            console.log(gameboard);
+        }
+
+        if (winner || Draw){
+            return 
+        }
+
+        // if ai is true this function runs
+        if (player2.turn === true && player2.ai === true) {
+            let emptyPlace = Computer.computerMove(gameboard);
+            boxs.forEach(function (box) {
+                if (Number(box.id) === emptyPlace) {
+                    box.style.color = "black";
+                    box.textContent = player2.mark;
+                    gameboard[emptyPlace] = player2.mark; // adding the mark in the gameboard array
+                }
+            });
+
+            // checking for winner this function takes player's mark, gameboard and player's name
+            CheckWinner.checkWinner(player2.mark, gameboard, player2.name);
+
+            player2.turn = false;
+            player1.turn = true;
+
+
+            if (winner || Draw){
+                // pass
+            }else{
+                showplayerTurn.textContent = `${player1.name} turn!`;
+            }
+            console.log(gameboard);
         }
     }
 
@@ -378,9 +456,15 @@ const DisplayController = (function () {
             modal.style.display = "none";
         }
 
-        gameboard = [];
+        gameboard = ["", "", "", "", "", "", "", "", ""];
         winner = false;
         Draw = false;
+
+        if (player2.ai === true) {
+            player1.turn = true;
+            player2.turn = false;
+        }
+
         const boxs = document.querySelectorAll(".box");
         boxs.forEach((box) => {
             box.innerText = "";
@@ -396,9 +480,9 @@ const DisplayController = (function () {
         }
         
         // if player 1 won then player 2's turn is showed and vice versa
-        if (playerTurnText.textContent === `${player1.name} Won!`) {
+        if (playerTurnText.textContent === `${player1.name} Won!` && player2.ai === false) {
             playerTurnText.textContent = `${player2.name} turn!`;
-        }else if (playerTurnText.textContent === `${player2.name} Won!`) {
+        }else if (playerTurnText.textContent === `${player2.name} Won!` && player2.ai === false) {
             playerTurnText.textContent = `${player1.name} turn!`;
         }
     }
