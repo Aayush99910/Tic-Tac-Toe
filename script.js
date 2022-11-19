@@ -48,9 +48,120 @@ const Computer = (function () {
         };
     }
 
-    return {
-        computerMove: computerMove
+    const bestMove = function (gameboard) {
+        let bestScore = -Infinity;
+        let move;
+        for(let i = 0; i < gameboard.length; i++) {
+            if (gameboard[i] === "") {
+                gameboard[i] = "O";
+                let score = _minimax(gameboard, 0, false);
+                gameboard[i] = "";
+                if (score > bestScore) {
+                    bestScore = score;
+                    move = i;
+                }
+            }
+        }
+        return move;
     }
+
+    const _checkAbstractWinner = function(gameboard) {
+        const mark = ["X", "O"];
+        for (let j = 0; j < mark.length; j++) {
+            let Test = [];
+            let winner = false;
+            
+            for (let i = 0; i < gameboard.length; i++) {
+                if (gameboard[i] === mark[j]) {
+                    Test.push(i);
+                }
+            }
+
+            // checking for winner if the pattern is [0, 3, 6]
+            if (Test.includes(0) && Test.includes(1) && Test.includes(2)) {
+                winner = true;
+                return mark[j];
+            } // checking for winner if the pattern is [2, 5, 8]
+            else if (Test.includes(3) && Test.includes(4) && Test.includes(5)) {
+                winner = true;
+                return mark[j];
+            } // checking for winner if the pattern is [1, 4, 7]
+            else if (Test.includes(6) && Test.includes(7) && Test.includes(8)) {
+                winner = true;
+                return mark[j];
+            } else if (Test.includes(0) && Test.includes(3) && Test.includes(6)) {
+                winner = true;
+                return mark[j];
+            }
+            else if (Test.includes(1) && Test.includes(4) && Test.includes(7)) {
+                winner = true;
+                return mark[j];
+            }
+            else if (Test.includes(2) && Test.includes(5) && Test.includes(8)) {
+                winner = true;
+                return mark[j];
+            }
+            else if (Test.includes(0) && Test.includes(4) && Test.includes(8)) {
+                winner = true;
+                return mark[j];
+            }
+            else if (Test.includes(2) && Test.includes(4) && Test.includes(6)) {
+                winner = true;
+                return mark[j];
+            }
+            else if (Test.length === 5 && winner === false) {
+                return "draw";
+            }
+        }
+        return null;
+    }
+
+    const scores = {
+        O: 1,
+        X: -1,
+        draw: 0
+    }
+
+    function _minimax(gameboard, depth, isMaximizing)  {
+        let result = _checkAbstractWinner(gameboard);
+        if (result !== null) {
+            return scores[result]
+        }
+
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            for(let i = 0; i < gameboard.length; i++) {
+                if (gameboard[i] === "") {
+                    gameboard[i] = "O";
+                    let score = _minimax(gameboard, depth+1, false);
+                    gameboard[i] = "";
+                    if (score > bestScore) {
+                        bestScore = score;
+                    }
+                }
+            }
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            for (let i = 0; i < gameboard.length; i++) {
+                if (gameboard[i] === "") {
+                    gameboard[i] = "X";
+                    let score = _minimax(gameboard, depth+1, true);
+                    gameboard[i] = "";
+                    if (score < bestScore) {
+                        bestScore = score;
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
+
+    return {
+        computerMove: computerMove,
+        bestMove: bestMove
+    }
+
 })();
 
 
@@ -318,7 +429,7 @@ const DisplayController = (function () {
     // function that shows the main and hides the main
     const hideGrid = function () {
         // when we goback to the main title everything is reset
-        gameboard = [];
+        gameboard = ["", "", "", "", "", "", "", "", ""];
         winner = false;
         Draw = false;
         const boxs = document.querySelectorAll(".box");
@@ -399,33 +510,59 @@ const DisplayController = (function () {
 
         if (winner || Draw){
             return 
-        }
+        }   
 
-        // if ai is true this function runs
         if (player2.turn === true && player2.ai === true) {
-            let emptyPlace = Computer.computerMove(gameboard);
+            let bestMove = Computer.bestMove(gameboard);
             boxs.forEach(function (box) {
-                if (Number(box.id) === emptyPlace) {
-                    box.style.color = "black";
-                    box.textContent = player2.mark;
-                    gameboard[emptyPlace] = player2.mark; // adding the mark in the gameboard array
+                if (Number(box.id) === bestMove) {
+                box.style.color = "black";
+                box.textContent = player2.mark;
+                gameboard[bestMove] = player2.mark; // adding the mark in the gameboard array
                 }
             });
-
+        
             // checking for winner this function takes player's mark, gameboard and player's name
             CheckWinner.checkWinner(player2.mark, gameboard, player2.name);
-
+        
             player2.turn = false;
             player1.turn = true;
-
-
+        
+        
             if (winner || Draw){
                 // pass
             }else{
                 showplayerTurn.textContent = `${player1.name} turn!`;
             }
             console.log(gameboard);
+                
         }
+
+        // if ai is true this function runs
+        // if (player2.turn === true && player2.ai === true) {
+        //     let emptyPlace = Computer.computerMove(gameboard);
+        //     boxs.forEach(function (box) {
+        //         if (Number(box.id) === emptyPlace) {
+        //             box.style.color = "black";
+        //             box.textContent = player2.mark;
+        //             gameboard[emptyPlace] = player2.mark; // adding the mark in the gameboard array
+        //         }
+        //     });
+
+        //     // checking for winner this function takes player's mark, gameboard and player's name
+        //     CheckWinner.checkWinner(player2.mark, gameboard, player2.name);
+
+        //     player2.turn = false;
+        //     player1.turn = true;
+
+
+        //     if (winner || Draw){
+        //         // pass
+        //     }else{
+        //         showplayerTurn.textContent = `${player1.name} turn!`;
+        //     }
+        //     console.log(gameboard);
+        // }
     }
 
     const showWinner = function (playername) {
