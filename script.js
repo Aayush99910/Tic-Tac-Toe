@@ -122,13 +122,13 @@ const Computer = (function () {
         draw: 0
     }
 
-    function _minimax(gameboard, depth, isMaximizing)  {
-        let result = _checkAbstractWinner(gameboard);
-        if (result !== null) {
-            return scores[result]
+    function _minimax(gameboard, depth, isMaximizingPlayer)  {
+        let winnerMark = _checkAbstractWinner(gameboard);
+        if (winnerMark !== null) {
+            return scores[winnerMark];
         }
 
-        if (isMaximizing) {
+        if (isMaximizingPlayer) {
             let bestScore = -Infinity;
             for(let i = 0; i < gameboard.length; i++) {
                 if (gameboard[i] === "") {
